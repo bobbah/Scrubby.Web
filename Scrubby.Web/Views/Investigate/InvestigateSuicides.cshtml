@@ -1,0 +1,275 @@
+﻿@{
+    ViewData["Title"] = "Investigate | Suicides";
+}
+
+<script>var clipboard = new ClipboardJS('.copy-link');</script>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Investigate" asp-action="Index">Investigate</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Suicides</li>
+    </ol>
+</nav>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;" >
+                <h1>Investigate Suicides</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+<form id="suicideSearch" class="row g-3">
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="CKeys">CKey to Investigate</label>
+        <input type="text" class="form-control" placeholder="CKey" id="ckey"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="limit">Start Date [Opt]</label>
+        <input type="date" class="form-control" id="startDate"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="startingRound">End Date [Opt]</label>
+        <input type="date" class="form-control" id="endDate"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <button type="button" class="btn btn-primary form-control" id="submit-search">Submit</button>
+    </div>
+</form>
+
+<div id="resultsContainer">
+
+</div>
+
+<style>
+    div.card-header div.col-6 > * { align-self: center; }
+
+    table.evidence {
+        background-color: rgba(0, 0, 0, 0.07);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-collapse: separate;
+        border-radius: 3px;
+        border-spacing: 0;
+        box-shadow: rgba(0, 0, 0, 0.02) 2px 2px inset;
+    }
+
+    td.evidence { padding: 2px 7px 2px 7px; }
+</style>
+
+<script>
+    var toDraw = [];
+    var ckey = null;
+    var infContainer = null;
+
+    const roundTemplate = ({ round, job, timestamp, connectedTime, roundStartPlayer, playedInRound, antagonist, roundStartSuicide, evTimestamp, evType, evMessage, evLocation }) => `
+        <div class="card mb-2" id="c${round}">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-6 d-flex flex-row">
+                        <h4 style="margin-bottom: 0; display: inline-block;"><a href="/round/${round}">${round}</a></h4>
+                        ${playedInRound ? '<span class="badge bg-primary ms-2">Played</span>' : '<span class="badge bg-secondary ms-2">Observed</span>'}
+                        ${antagonist ? '<span class="badge bg-success ms-2">Antag</span>' : ''}
+                        ${roundStartPlayer ? '<span class="badge bg-info ms-2">Roundstart Join</span>' : ''}
+                        ${roundStartSuicide ? '<span class="badge bg-danger ms-2">Roundstart Suicide</span>' : ''}
+                    </div>
+                    <div class="col-6 d-flex flex-row justify-content-end">
+                        <b>${timestamp} UTC</b>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <b>Session Duration:</b> ${connectedTime.split('.')[0]} <br />
+                ${job != null ? `<b>Job:</b> ${job.replace(/\b\w/g, l => l.toUpperCase())} <br />` : ''}
+                ${evTimestamp != null
+        ? `
+                <b>Evidence:</b>
+                <table class="evidence">
+                    <tbody>
+                        <tr class="logmessage-${evType.toLowerCase()}">
+                            <td class="evidence timestamp">
+                                ${evTimestamp.format("HH:mm:ss")}
+                            </td>
+                            <td class="evidence type">
+                                ${evType}
+                            </td>
+                            <td class="evidence message">
+                                ${evMessage}
+                            </td>
+                            <td class="evidence location">
+                                ${evLocation}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                `
+        : ''}
+            </div>
+        </div>
+    `;
+
+    const playerTemplate = ({ ckey, roundsCount, playedRoundsCount, roundstartCount, suicideNoAntagCount, antagRoundsCount }) => `
+        <div class="card mb-2" id="results-head">
+            <div class="card-header">
+                <h4>${ckey}</h4>
+            </div>
+            <div class="card-body">
+                <b>Total Rounds:</b> ${roundsCount} <br />
+                <b class="ms-3">- Played Rounds:</b> ${playedRoundsCount} (${(playedRoundsCount / roundsCount * 100).toFixed(2)}% of total rounds)<br />
+                <b class="ms-3">- Joined Roundstart:</b> ${roundstartCount} (${(roundstartCount / playedRoundsCount * 100).toFixed(2)}% of played rounds)<br />
+                <b class="ms-3">- Suicide W/O Antag Within 10 Mins:</b> ${suicideNoAntagCount} (${(suicideNoAntagCount / (roundstartCount - antagRoundsCount) * 100).toFixed(2)}% of played roundstart joins)<br />
+                <b class="ms-3">- Antag Rounds:</b> ${antagRoundsCount} (${(antagRoundsCount / playedRoundsCount * 100).toFixed(2)}% of played rounds)
+            </div>
+        </div>
+        `;
+
+    $(document).ready(function() {
+        infContainer = $('#resultsContainer').infiniteScroll({
+            path: 'path{{#}}',
+            loadOnScroll: false,
+            history: false
+        });
+
+        infContainer.on('scrollThreshold.infiniteScroll',
+            function(event) {
+                event.preventDefault();
+                drawData(10);
+            });
+
+        $('#suicideSearch').submit(function(event) {
+            event.preventDefault();
+            submitSearch();
+        });
+
+        $('#submit-search').click(submitSearch);
+    });
+
+    function submitSearch() {
+        $('#resultsContainer').empty();
+        toDraw = [];
+        ckey = $('#ckey').val();
+
+        var dataObj = {
+            CKey: ckey,
+            StartDate: $('#startDate').val(),
+            EndDate: $('#endDate').val()
+        };
+
+        var rounds = $.ajax({
+            type: "POST",
+            url: "@Url.Action("GetReceiptsForPlayer")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+                $('.form-control').attr('disabled', true);
+            },
+            complete: function() {
+                $('.form-control').attr('disabled', false);
+            },
+            dataType: "json",
+            data: JSON.stringify(dataObj)
+        });
+
+        $.when(rounds).done(function(data) {
+            processResults(data);
+        });
+    }
+
+    function processResults(data) {
+        var cont = $('#resultsContainer');
+        var roundsCount = 0;
+        var playedRoundsCount = 0;
+        var roundstartCount = 0;
+        var suicideNoAntagCount = 0;
+        var antagRoundsCount = 0;
+
+        // get counts
+        data.forEach(function(elem) {
+            roundsCount++;
+            if (elem.roundStartPlayer) roundstartCount++;
+            if (elem.playedInRound) playedRoundsCount++;
+            if (elem.antagonist) antagRoundsCount++;
+            if (elem.roundStartSuicide) suicideNoAntagCount++;
+
+            toDraw.push(elem);
+        });
+
+        cont.prepend($.parseHTML([{ ckey: ckey, roundsCount: roundsCount, playedRoundsCount: playedRoundsCount, roundstartCount: roundstartCount, suicideNoAntagCount: suicideNoAntagCount, antagRoundsCount: antagRoundsCount }].map(playerTemplate).join('')));
+        drawData(10);
+    }
+
+    function getConnectionData(round, start, end) {
+        var dataObj = {
+            Round: round,
+            CKeyFilter: ckeysList
+        };
+
+        var connections = $.ajax({
+            type: "POST",
+            url: "@Url.Action("GetConnectionsForRound")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json",
+            data: JSON.stringify(dataObj)
+        });
+
+        $.when(connections).done(function(data) {
+            processConnections(data, round, start, end);
+        });
+    }
+
+    function processConnections(data, round, roundStart, roundEnd) {
+        var tasks = [];
+
+        data.forEach(function(elem) {
+            tasks.push({
+                "startDate": moment.utc(elem.connectTime).toDate(),
+                "endDate": moment.utc(elem.disconnectTime).toDate(),
+                "taskName": elem.cKey.cleaned,
+                "taskStatus": "CONNNECTED"
+            });
+        });
+
+        var taskNames = ckeysList;
+        var taskStatus = ["CONNECTED"];
+        var elem = $("#c" + round + " > .card-body");
+        elem.empty();
+
+        var chart = d3.gantt().taskTypes(taskNames).taskStatus(taskStatus).selector("#c" + round + " > .card-body").width(elem.width() - 195).height(100 + taskNames.length * 40);
+        chart.timeDomainMode("fixed").timeDomain([moment.utc(roundStart).toDate(), moment.utc(roundEnd).toDate()]);
+        chart(tasks);
+    }
+
+    function drawData(limit) {
+        toDraw.sort((a, b) => a.roundID - b.roundID);
+        var cont = $('#resultsContainer');
+        for (i = 0; i < toDraw.length && i < limit; i++) {
+            var elem = toDraw.pop();
+            cont.append($.parseHTML([
+                {
+                    round: elem.roundID,
+                    job: elem.job,
+                    timestamp: moment.utc(elem.timestamp).format('YYYY-MM-DD HH:mm:ss'),
+                    connectedTime: elem.connectedTime,
+                    roundStartPlayer: elem.roundStartPlayer,
+                    playedInRound: elem.playedInRound,
+                    antagonist: elem.antagonist,
+                    roundStartSuicide: elem.roundStartSuicide,
+                    evTimestamp: elem.firstSuicideEvidence != null ? moment.utc(elem.firstSuicideEvidence.timestamp) : null,
+                    evType: elem.firstSuicideEvidence != null ? elem.firstSuicideEvidence.type : null,
+                    evMessage: elem.firstSuicideEvidence != null ? elem.firstSuicideEvidence.message : null,
+                    evLocation: elem.firstSuicideEvidence != null ? elem.firstSuicideEvidence.originName : null
+                }
+            ].map(roundTemplate).join('')));
+        }
+    }
+</script>

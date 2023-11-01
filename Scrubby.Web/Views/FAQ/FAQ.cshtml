@@ -1,0 +1,15 @@
+﻿@model  FAQViewModel
+@{
+    ViewData["Title"] = "FAQ";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">FAQ</li>
+    </ol>
+</nav>
+
+@Html.Raw(Model.Raw)

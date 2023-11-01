@@ -1,0 +1,80 @@
+﻿@model RoundModel
+@{
+    ViewData["Title"] = $"R{Model.CurrentRound.Id}";
+}
+
+@section AddToHead {
+    <meta property="og:title" content="@($"R{Model.CurrentRound.Id}")"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content="https://scrubby.melonmesa.com/images/ScrubbyBar.svg"/>
+    <meta property="og:url" content="https://scrubby.melonmesa.com/round/@Model.CurrentRound.Id"/>
+    <meta property="og:site_name" content="Scrubby"/>
+    <meta property="og:description" content="Round incomplete, not yet parsed, or nonexistant..."/>
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@($"R{Model.CurrentRound.Id}")</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col">
+            @if (Model.LastID != -1)
+            {
+                if (Model.HightlightedCkeys != null && Model.HightlightedCkeys.Any())
+                {
+                    <a href="@Url.Action("FetchRound", "Round", new { id = Model.LastID, h = Model.HightlightedCkeys })" class="btn btn-primary float-start" role="button">
+                        <i class="fas fa-angle-left"></i> @Model.LastID
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Round" asp-action="FetchRound" asp-route-id="@Model.LastID" class="btn btn-primary float-start" role="button">
+                        <i class="fas fa-angle-left"></i> @Model.LastID
+                    </a>
+                }
+            }
+        </div>
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;" >
+                <h1>
+                    @Model.CurrentRound.Id
+                </h1>
+                <span class="badge bg-warning align-top">Round Missing</span>
+            </div>
+        </div>
+        <div class="col order-2 order-md-last">
+            @if (Model.NextID != -1)
+            {
+                if (Model.HightlightedCkeys != null && Model.HightlightedCkeys.Any())
+                {
+                    <a href="@Url.Action("FetchRound", "Round", new { id = Model.NextID, h = Model.HightlightedCkeys })" class="btn btn-primary float-end" role="button">
+                        <i class="fas fa-angle-right"></i> @Model.NextID
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Round" asp-action="FetchRound" asp-route-id="@Model.NextID" class="btn btn-primary float-end" role="button">
+                        @Model.NextID <i class="fas fa-angle-right"></i>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>
+<br/>
+<div class="container row justify-content-center">
+    <div class="col-6">
+        <h2>Oh dear!</h2>
+        <p>
+            Looks like this round hasn't finished yet, hasn't had public logs posted yet, or simply doesn't exist.
+            Check back later if you are sure this round happened; typically the logs for a round are posted around
+            the time the following round on that server ends.
+        </p>
+    </div>
+</div>

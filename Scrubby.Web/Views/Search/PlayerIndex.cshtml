@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "Search | Player";
+}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb" style="background-color: #e9ecef; border-radius: 0.25rem; padding: 0.75rem 1rem;">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item" aria-current="page">Search</li>
+        <li class="breadcrumb-item active" aria-current="page">Player</li>
+    </ol>
+</nav>
+
+<div id="error-container">
+
+</div>
+<div class="container d-flex flex-column align-items-center">
+    <form class="row" id="controls">
+        <div class="col">
+            <input type="text" class="form-control" id="searchText" placeholder="Search Pattern"/>
+        </div>
+        <div class="col">
+            <select class="form-select" id="searchType">
+                        <option value="ICName">IC Name</option>
+                        <option value="CKey">CKey (BYOND Username)</option>
+                    </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary mb-2" id="submitSearch">Search</button>
+        </div>
+    </form>
+</div>
+<div id="results" class="hidden">
+    <table class="table table-striped" id="results-table">
+        <thead>
+        <tr>
+            <th class="name-column">Name</th>
+            <th>CKey</th>
+            <th>Instances</th>
+        </tr>
+        </thead>
+        <tbody id="results-table-body">
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+    let firstSearch = true;
+
+    $(document).ready(function() {
+        const searchTypeCookieName = 'searchTypeValue';
+        
+        // Load the saved option from the cookie
+        const savedOption = getCookie(searchTypeCookieName);
+        if (savedOption) {
+            $('#searchType').val(savedOption);
+        }
+
+        // Save the selected option to the cookie when the user changes it
+        $('#searchType').change(function () {
+            const selectedOption = $(this).val();
+            setCookie(searchTypeCookieName, selectedOption, 30); // Set the cookie for 30 days
+        });
+
+        $('#controls').submit(function(event) {
+            event.preventDefault();
+            submitSearch();
+        });
+    });
+
+    $('#submitSearch').click(function() {
+        submitSearch();
+    });
+
+    function submitSearch() {
+        const searchPattern = $('#searchText').val();
+        const searchType = $('#searchType').val();
+        const postObj = {
+            RegexPattern: searchPattern,
+            SearchTypeStr: searchType
+        };
+
+        $('#controls').children().attr('disabled', true);
+
+        const dataResponse = $.ajax({
+            type: "POST",
+            url: "@Url.Action("ExecutePlayerSearch")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            success: function(data) {
+                const dataCont = $('#results-table-body');
+                dataCont.empty();
+
+                if (firstSearch) {
+                    $('#results').removeClass('hidden');
+                    firstSearch = false;
+                }
+
+                if (searchType === 'ICName') {
+                    $('.name-column').show();
+                } else {
+                    $('.name-column').hide();
+                }
+
+                data.forEach(function(elem) {
+                    dataCont.append($(`<tr>${elem.icName == null ? '' : '<td>' + elem.icName + '</td>'}<td>${getCKeyButton(elem.cKey.raw)}</td><td>${elem.count}</td></tr>`));
+                });
+            },
+            error: function(data) {
+                $('#error-container').append($(getAlert(data.responseText)));
+            },
+            complete: function() {
+                $('#controls').children().attr('disabled', null);
+            },
+            dataType: 'json',
+            data: JSON.stringify(postObj)
+        });
+    }
+    
+    function setCookie(cname, cvalue, exdays) {
+        const d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        const expires = 'expires=' + d.toUTCString();
+        document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/';
+    }
+    
+    function getCookie(cname) {
+        const name = cname + '=';
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return '';
+    }
+
+    function getCKeyButton(ckey) {
+        return '<a class="btn btn-outline-primary mb-1"' +
+            `href="@(Url.Action("FetchCKey", "CKey", new { ckey = "!!REPLACE!!" }).Replace("!!REPLACE!!", "${ckey}"))"` +
+            `>${ckey}</a>`;
+    }
+
+    function getAlert(alertText) {
+        return `<div class="alert alert-danger alert-dismissible fade show"><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>${alertText}</div>`;
+    }
+</script>

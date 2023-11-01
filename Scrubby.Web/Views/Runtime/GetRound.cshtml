@@ -1,0 +1,137 @@
+﻿@model  RoundRuntimeModel
+@{
+    var roundID = Model.RoundID;
+    ViewData["Title"] = $"R{roundID} | Runtimes";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Round" asp-action="FetchRound" asp-route-id="@roundID">@($"R{roundID}")</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Runtimes</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;" >
+                <h1>@($"R{roundID}") - Runtimes</h1>
+                <span id="runtime-count-container" class="hidden badge bg-success align-top"><span id="runtime-count">???</span> runtimes</span>
+            </div>
+        </div>
+    </div>
+    <div id="loading-container" class="row justify-content-center">
+        <div class="col-auto">
+            Loading...
+        </div>
+    </div>
+</div>
+<br/>
+<div id="runtime-container">
+</div>
+
+<style>
+    div.codeblock {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        box-shadow: rgba(0, 0, 0, 0.02) 2px 2px inset;
+    }
+
+    table.codeblock-table { width: 100%; }
+
+    td.codeblock {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9em;
+    }
+
+    td.codeblock-num {
+        background-color: rgba(0, 0, 0, 0.10);
+        color: rgba(0, 0, 0, 0.4);
+        min-width: 50px;
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+    td.codeblock-line {
+        display: flex;
+        flex-direction: row;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    table.codeblock-table > tbody > tr:nth-child(2n) > td.codeblock-line { background-color: rgba(0, 0, 0, 0.05); }
+
+    i.fa-exclamation-circle { color: #e84747; }
+
+    .card-body b { color: #545454; }
+</style>
+
+<script>
+    $(document).ready(() => {
+        loadData();
+    });
+    
+    const loadData = () => {
+        $.ajax({
+            url: "@Url.Action("GetRuntimesForRound", "Runtime", new { round = Model.RoundID })",
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: (data) => {
+                renderData(data);
+            }
+        });
+    };
+    
+    const renderData = (data) => {
+        $('#loading-container').hide();
+        $('#runtime-count').text(data.length);
+        $('#runtime-count-container').toggleClass('hidden');
+        $('#runtime-container').append($(data.map(x => `
+            <div class="card mb-2">
+                <div class="card-header">
+                    <i class="fa fa-exclamation-circle"></i> [${moment.utc(x.timestamp).format('HH:mm:ss')}] ${x.exception}
+                </div>
+                <div class="card-body">
+                    Thrown by <code>${x.proc} (${x.procPath})</code> at <code>${x.sourceFile}, line ${x.line}</code><br/>
+        
+                    <p class="mb-2 mt-2">
+                        ${x.user && `<b>User:</b> ${renderAtom(x.user)}<br/>` || ''}
+                        ${x.userLocation && `<b>User Location:</b> ${renderAtom(x.userLocation)}<br/>` || ''}
+                        ${x.source && `<b>Source:</b> ${renderAtom(x.source)}<br/>` || ''}
+                        ${x.sourceLocation && `<b>Source Location:</b> ${renderAtom(x.sourceLocation)}<br/>` || ''}
+                    </p>
+        
+                    <b>Stacktrace:</b>
+                    <div class="ms-3 me-3 mt-1 codeblock">
+                        <table class="codeblock codeblock-table">
+                            <tbody>
+                            ${x.stacktrace.map(y => `<tr><td class="codeblock codeblock-num">${y.index + 1}</td><td class="codeblock codeblock-line">${y.line}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `).join('')));
+    };
+    
+    const renderAtom = (atom) => {
+        if (atom === null)
+            return null;
+        let result = atom.name;
+        if (atom.typePath !== null)
+            result += ` (${atom.typePath})`
+        if (atom.x !== null)
+            result += ` (${atom.x}, ${atom.y}, ${atom.z})`;
+        result.trim();
+        return result;
+    };
+</script>

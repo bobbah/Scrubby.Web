@@ -1,0 +1,133 @@
+﻿@model Scrubby.Web.Models.Data.ScrubbyRound
+@{
+
+}
+<canvas id="populationChart"></canvas>
+<script>
+    var chartData = null;
+
+    $(document).ready(function() {
+        GetPopData({ round: @Model.Id, interval: 30 });
+    });
+
+    function GetPopData(data) {
+        $.ajax({
+            url: "@Url.Action("GetPopulationForRound", "ServerConnection")",
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: CreateChartData
+        });
+    }
+
+    function CreateChartData(data, status) {
+        chartData = {
+            datasets: [
+                {
+                    label: "Connected Clients",
+                    data: []
+                }
+            ]
+        };
+
+        var min = data[0].key.substring(0, data[0].key.length - 1);
+        var max = data[data.length - 1].key.substring(0, data[data.length - 1].key.length - 1);
+
+        data.forEach(function(elem) {
+            var dataObject = {};
+            dataObject.x = moment(elem.key.substring(0, elem.key.length - 1));
+            dataObject.y = elem.value;
+            chartData.datasets[0].data.push(dataObject);
+        });
+
+        BuildPopulationChart(chartData, moment(min).toDate(), moment(max).toDate());
+    }
+
+    function BuildPopulationChart(data, minTime, maxTime) {
+        var config = {
+            type: "line",
+            data: data,
+            options: {
+                plugins: {
+                    colorschemes: {
+                        scheme: "brewer.Paired12"
+                    },
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: "x",
+                            rangeMin: {
+                                x: minTime
+                            },
+                            rangeMax: {
+                                x: maxTime
+                            }
+                        },
+                        zoom: {
+                            enabled: true,
+                            mode: "x",
+                            rangeMin: {
+                                x: minTime
+                            },
+                            rangeMax: {
+                                x: maxTime
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [
+                        {
+                            type: "time",
+                            display: true,
+                            time: {
+                                unit: 'minute',
+                                tooltipFormat: 'h:mm'
+                            },
+                            scaleLabel: {
+                                display: false
+                            },
+                            ticks: {
+                                maxTicksLimit: 11,
+                                stepSize: 5
+                            }
+                        }
+                    ],
+                    yAxes: [
+                        {
+                            display: true,
+                            scaleLabel: {
+                                display: false,
+                                labelString: "Population"
+                            },
+                            ticks: {
+                                precision: 0,
+                                maxTicksLimit: 6
+                            }
+                        }
+                    ]
+                },
+                elements: {
+                    line: {
+                        tension: 0.1
+                    },
+                    point: {
+                        radius: 0,
+                        hitRadius: 5,
+                        hoverRadius: 5
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        };
+
+        var ctx = $('#populationChart')[0].getContext('2d');
+        var chart = new Chart(ctx, config);
+    }
+
+</script>

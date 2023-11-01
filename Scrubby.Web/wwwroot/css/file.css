@@ -1,0 +1,75 @@
+﻿/* General styling of log message table */
+table.logmessage-table > tbody > tr > td {
+    padding: 0.15rem 0.5rem 0.15rem 0.5rem;
+}
+
+#dropdown-filter {
+    display: inline-block;
+}
+
+#relative-time-switch {
+    display: inline-block;
+    margin-left: 1rem;
+}
+
+/* Line-Linking in Files */
+
+.logmessage:target {
+    -webkit-transition: all 1.5s ease;
+    background-color: #fff3cd;
+}
+
+.table-striped > tbody > tr:nth-child(odd).logmessage:target {
+    -webkit-transition: all 1.5s ease;
+    background-color: #fff3cd;
+}
+
+/* Log Line Colors */
+
+table:not(.table-striped) > tbody > tr.logmessage-game {
+    background-color: #e2ffd6;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-abnormal {
+    background-color: #fff5cc;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-access {
+    background-color: #effee9;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-ooc {
+    background-color: #d6e6ff;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-admin {
+    background-color: #ffcccc;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-say {
+    background-color: #f8eaff;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-emote {
+    background-color: #fbf6fe;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-emote > td.text-wrap {
+    font-style: italic;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-law {
+    background-color: #e8ffff;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-pda {
+    background-color: #efd4fc;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-attack {
+    background-color: #ffdddd;
+}
+
+table:not(.table-striped) > tbody > tr.logmessage-manifest {
+    background-color: #fef8e0;
+}

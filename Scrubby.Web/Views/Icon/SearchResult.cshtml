@@ -1,0 +1,279 @@
+﻿@using System.Text.Json
+@model IconSearchResultModel
+@{
+    ViewData["Title"] = "Icon Search";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Icon Search</li>
+    </ol>
+</nav>
+<div id="data" class="hidden" data-obj="@JsonSerializer.Serialize(Model)"></div>
+<div class="container d-flex flex-column align-items-center">
+    <div class="row justify-content-center align-items-center">
+        <form id="searchForm" class="row" method="post" asp-controller="Icon" asp-action="SearchIconPost" asp-antiforgery="true">
+            <div class="col">
+                <input type="text" id="name" placeholder="Regex Query" class="form-control" name="query" value="@Model.SearchQuery"/>
+            </div>
+            <div class="col-auto">
+                <select id="codebase" name="codebase" placeholder="Codebase" class="form-select">
+                    <option id="defaultCodebase" selected value="@(Model.Codebase)">Loading codebases...</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-2">Search</button>
+                <a asp-controller="FAQ" asp-action="Index" asp-fragment="icon-search" class="ms-2 text-primary far fa-question-circle mb-2"></a>
+            </div>
+        </form>
+    </div>
+    <div>
+        <span class="badge bg-warning align-top hidden" id="icon-count">Loading icons...</span>
+    </div>
+</div>
+<div id="results-container"></div>
+
+<script>
+    const amApi = "https://am.melonmesa.com/api";
+    let infCont = null;
+    let records = null;
+    let drawing = false;
+    const hasInitialQuery = @(!string.IsNullOrEmpty(Model.SearchQuery) ? "true" : "false");
+    let lastCodebase;
+    
+    const searchUrlBase = "@(Url.Action("SearchIcon", "Icon", new { searchTerm = "!!1!!", codebase = "!!2!!" }))";
+    const getSearchUrl = (query, codebase) => {
+        return searchUrlBase.replace('!!1!!', query).replace('!!2!!', codebase);
+    };
+    
+    const spritesheetUrlBase = "@(Url.Action("GetSpriteSheet", "Icon", new { path = "!!1!!", codebase = "!!2!!" }))";
+    const getPathUrl = (path, codebase) => {
+        return spritesheetUrlBase.replace('!!1!!', path).replace('!!2!!', codebase);
+    };
+    
+    $(document).ready(() => {
+        getCodebases();
+        
+        // Initial record fetch
+        if (hasInitialQuery) {
+            $('#icon-count').removeClass('hidden');
+            fetchRecords(false);
+        }
+        
+        $('#searchForm').on('submit', e => {
+            e.preventDefault();
+            fetchRecords(true);
+        });
+
+        infCont = $('#results-container').infiniteScroll({
+            path: 'path{{#}}',
+            loadOnScroll: false,
+            history: false
+        });
+        
+        infCont.on('scrollThreshold.infiniteScroll', e => {
+            e.preventDefault();
+            if (!drawing && records !== null && records.length > 0)
+                drawRecords(20);
+        });
+        
+        $(window).on('popstate', e => {
+            $('#name').val(e.originalEvent.state.searchPattern);
+            $('#codebase').val(e.originalEvent.state.repoFilter);
+            fetchRecords(false);
+        });
+    });
+    
+    const drawRecords = (count) => {
+        drawing = true;
+
+        records.splice(0, count - 1).forEach(record => {
+            const recordPath = record.path.split('@@')[0];
+            $('#results-container').append($(`
+                <div class="container row icon-state-container justify-content-center">
+                    <div class="col-2">
+                        <div class="icon-box">
+                            <img src="${amApi}/asset/${record.previewAsset}" class="checkered dmi-icon" />
+                        </div>
+                    </div>
+                    <div class="col-4 icon-details">
+                        <div class="row">
+                            <div class="col-6">
+                                <h4>${record.name}</h4>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#a${record.id}" aria-expanded="false" aria-controls="a${record.id}">
+                                    Dirs
+                                </button>
+                            </div>
+                        </div>
+                        <p class="mb-0">
+                            <b>File:</b> <a href="${getPathUrl(recordPath, lastCodebase)}">${recordPath}</a><br />
+                            <b>Dimensions:</b> ${record.width}x${record.height}<br />
+                            <b>Directions:</b> ${record.directions} <br />
+                            <b>Frames:</b> ${record.frames}
+                            ${record.animations && `<b>Animations:</b> ${record.animations}` || ''}
+                        </p>
+                        <div class="collapse" id="a${record.id}"></div>
+                    </div>
+                </div>`
+            ));
+        });
+        
+        // Setup the dir button
+        $('#results-container div.collapse').on('show.bs.collapse', e => {
+            const target = $(e.target);
+            if (target.attr('data-status') === 'rendered')
+                return;
+            
+            e.preventDefault();
+            if (target.attr('data-status') === 'loading')
+                return;
+            
+            renderDetails(target.attr('id').slice(1));
+        });
+        
+        drawing = false;
+    };
+    
+    const getCodebases = () => {
+        const request = $.ajax({
+            url: `${amApi}/repo`,
+            type: 'GET',
+            contentType: 'application/json; charset=utf-8'
+        });
+        
+        request.done(data => {
+            const selectedCodebase = $('#defaultCodebase').val();
+            
+            // Sort codebases
+            data.sort((a, b) => {
+                const aComp = a.displayName.toUpperCase();
+                const bComp = b.displayName.toUpperCase();
+                return aComp < bComp ? -1 : (aComp > bComp ? 1 : 0);
+            });
+            
+            $('#codebase')
+                .empty()
+                .append($(data.map(x => `<option value="${x.name}" ${x.name === selectedCodebase && "selected" || ""}>${x.displayName}</option>`).join()));
+        });
+    };
+    
+    const fetchRecords = (addHistory) => {
+        drawing = true;
+        
+        const payload = {
+            searchType: 8, // sprite | image
+            searchPattern: $('#name').val(),
+            ignoreCase: true,
+            repoFilter: $('#codebase').val()
+        };
+        
+        // Set URL
+        const stateMod = records === null ? history.replaceState.bind(history) : history.pushState.bind(history);
+        if (addHistory)
+            stateMod(payload, null,  getSearchUrl(payload.searchPattern, payload.repoFilter));
+        lastCodebase = payload.repoFilter;
+        
+        const request = $.ajax({
+            url: `${amApi}/search`,
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json'
+        });
+        
+        request.done(data => {
+            records = data.results;
+            
+            // Update the icon search counter
+            const iconCount = $('#icon-count');
+            iconCount
+                .removeClass('bg-warning')
+                .removeClass('bg-success')
+                .removeClass('bg-danger');
+            if (records.length > 0)
+                iconCount.addClass('bg-success').text(`${records.length} Icons`);
+            else
+                iconCount.addClass('bg-danger').text('No icons found');
+
+            $('#results-container').empty();
+            drawRecords(20);
+        });
+        
+        request.fail(error => {
+            $('#alert-container').append($(`
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Failed to perform search:</strong> ${error.responseText}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`));
+            
+            $('#icon-count').removeClass('bg-warning').addClass('bg-danger').text('Search failed');
+        });
+        
+        request.always(() => {
+            drawing = false;
+        });
+    };
+    
+    const dirsMap = ['S', 'N', 'E', 'W', 'SE', 'SW', 'NE', 'NW'];
+    
+    const renderDetails = (id) => {
+        const container = $(`#a${id}`);
+        const button = $(`button[data-target="#a${id}"]`);
+        button.prop('disabled', true).text('Loading...');
+        container.attr('data-status', 'loading');
+        
+        const request = $.ajax({
+            url: `${amApi}/sprite/${id}`,
+            type: 'GET',
+            dataType: 'json'
+        });
+        
+        request.done(data => {
+            const resultContainer = $(`<div class="icon-box mt-2 mb-2"></div>`);
+            for (let dir = 0; dir < data.dirs; dir++) {
+                if (data.renderedAnimations) {
+                    const anim = data.renderedAnimations.find(e => e.direction === dir);
+                    if (anim !== undefined)
+                        resultContainer.append($(`
+                            <div class="icon-box-inner mb-2">
+                                <div class="icon-direction">${dirsMap[dir]}/GIF</div>
+                                <img src="${amApi}/asset/${anim.asset.id}" class="checkered dmi-icon" />
+                            </div>`));
+                }
+                
+                const frames = data.spriteFrames.filter(e => e.direction === dir);
+                if (frames === undefined || frames.length === 0)
+                    continue;
+            
+                frames.forEach(frameData => {
+                    resultContainer.append(`
+                        <div class="icon-box-inner ${frameData.frame !== 0 ? 'mt-2' : ''} ${dir === data.dirs - 1 && frameData.frame === frames.length - 1 ? '' : 'mb-2'}">
+                            <div class="icon-direction">${dirsMap[dir]}/F${frameData.frame + 1}</div>
+                            <img src="${amApi}/asset/${frameData.asset.id}" class="checkered dmi-icon" />
+                        </div>`);
+                });
+            }
+            container.append(resultContainer);
+            
+            // open container after completed
+            container.attr('data-status', 'rendered').collapse('show');
+        });
+        
+        request.fail(error => {
+            $('#alert-container').append($(`
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Failed to get sprite details:</strong> ${error.responseText}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`));
+        });
+        
+        request.always(() => {
+            button.prop('disabled', false).text('Dirs');
+        });
+    };
+</script>

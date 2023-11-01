@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Data Security Policy";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Data Security Policy</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <h1>Data Security Policy</h1>
+    <p>
+        Hello. My data security policy is very simple: <b>I don't store information about your visit.</b> There is now zero logging in Scrubby.
+        In the past information was briefly stored about a user's visit to ensure security audits could be performed if necessary, but in all of my time running the application
+        this was not necessary, and I felt strongly that this served no purpose other than to cause tension. I have left the previous cases of data disclosure below for posterity.
+    </p>
+    <p>
+        I personally invite you to help make sure that Scrubby as a project is kept honest about what information is used within the application by taking a look through
+        <a href="https://github.com/bobbah/ScrubbyWebPublic">the source on GitHub <i class="fab fa-github"></i></a>.
+    </p>
+    <h3>Can I Contact You With Concerns About My Data?</h3>
+    <p>Absolutely, feel free to contact me on Discord (<code>@@bobbah</code>) or in the /tg/station Discord itself.</p>
+
+    <h3>Situations of Data Disclosure to Third Parties</h3>
+
+    <p>
+        In the event of information accidentally or intentionally being given to a third party, the event along with a brief detail about it will be listed below.
+        I hope that this will help to provide transparency in any issue.
+    </p>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Event</th>
+            <th>Result/Outcome</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>August 6th, 2019</td>
+            <td>Information regarding a user's session was provided to /tg/ headmins uninvited after I incorrectly assumed that a admin's account breach was related.</td>
+            <td>This was an unacceptable abuse of end-user information, and will not occur again.</td>
+        </tr>
+        <tr>
+            <td>June 25, 2019</td>
+            <td>AtlantaNed, a former /tg/ admin, was given access to Scrubby's internal database. Due to loose permissioning, this allowed him to access the event log table.</td>
+            <td>I do not believe AtlantaNed abused this access, and it was lost in September of 2019. After that, no other user did or will have access to that data.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

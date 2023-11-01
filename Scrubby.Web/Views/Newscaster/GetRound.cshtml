@@ -1,0 +1,80 @@
+﻿@model NewsCasterModel
+@{
+    var index = 0;
+    ViewData["Title"] = $"R{Model.Round.ID} | News";
+}
+
+<script>var clipboard = new ClipboardJS('.copy-link');</script>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Round" asp-action="FetchRound" asp-route-id="@Model.Round.ID">@($"R{Model.Round.ID}")</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Newscasters</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;" >
+                <h1>@($"R{Model.Round.ID}") - Newscaster Channels</h1>
+                <span class="badge bg-success align-top">@Model.Channels.Count Channels</span>
+                <span class="badge bg-success align-top">@Model.Channels.Sum(x => x.Messages.Count()) Messages</span>
+                <span class="badge bg-success align-top">@Model.Channels.Sum(x => x.Messages.Count(y => y.PhotoFile != "")) Photos</span>
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+
+@foreach (var news in Model.Channels)
+{
+    var innerindex = 0;
+    <div class="newscaster-channel card mb-4" id="@(index)">
+        <div class="newscaster-header card-header">
+            <h1>@news.Name</h1>
+            <h6>Published by @news.Author</h6>
+        </div>
+        <div class="newscaster-body card-body">
+
+            @foreach (var message in news.Messages)
+            {
+                <div class="newscaster-message row" id="@($"{index}m{innerindex}")">
+                    <div class="col-8">
+                        @Html.Raw(message.Body)
+                        <br/>
+                        <br/>
+                        <span>
+                            <b>@($"Written by {message.Author} at {message.TimeStamp}ST")</b> <i class="fa fa-link copy-link" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="Copy Link" data-clipboard-text="@($"https://scrubby.melonmesa.com/round/{Model.Round.ID}/newscaster#{index}m{innerindex}")"></i>
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(message.PhotoFile))
+                    {
+                        <div class="col-4 my-auto">
+                            <img class="newscaster-image" src="@Url.Action("FetchImage", "Image", new { id = Model.Round.Files.First(x => x.FileName.StartsWith($"photos/{message.PhotoFile}")).FileName })"/>
+                        </div>
+                    }
+                </div>
+                @if (innerindex != news.Messages.Count - 1)
+                {
+                    <hr/>
+                }
+                innerindex++;
+            }
+        </div>
+    </div>
+    index++;
+}
+
+<style>
+    img.newscaster-image {
+        border-radius: 1rem;
+        image-rendering: pixelated;
+        width: 100%;
+    }
+</style>

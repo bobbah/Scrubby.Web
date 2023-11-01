@@ -1,0 +1,57 @@
+﻿@model BasicStatsModel
+@{
+    ViewData["Title"] = "Gateway";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page">Gateway</li>
+    </ol>
+</nav>
+
+<div style="text-align: center;">
+    <h1>Gateway</h1>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-4 p-2 border rounded border-primary mb-5">
+        <div class="row justify-content-center">
+            <div class="col-auto border-bottom text-center">
+                <h6 class="text-primary">Latest Rounds</h6>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-xl-2 justify-content-center mb-2 mt-2">
+            @foreach (var server in Model.LatestRounds)
+            {
+                <div class="col text-center">
+                    @(server.Server): <a asp-controller="Round" asp-action="FetchRound" asp-route-id="@server.Id">@server.Id</a>
+                    @if ((DateTime.UtcNow - server.Started).TotalHours > 3 && (DateTime.UtcNow - server.Started).TotalHours < 48)
+                    {
+                        <i class="fas fa-exclamation-triangle text-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="@($"[LATE] Last log for {server.Server} posted {(DateTime.UtcNow - server.Started).TotalHours : 0.0} hours ago.")"></i>
+                    }
+                </div>
+            }
+        </div>
+        <div class="stats-bar">
+            <div class="row justify-content-between">
+                <div class="col-12 col-lg-4">
+                    <code>@($"{Model.RoundCount / 1000.0:0.0}K") Rounds</code>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <code>@($"{Model.FileCount / 1000000.0:0.0}M") Files</code>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <code>@($"{Model.DatabaseSize / 1099511627776.0:0.0}TB") of Data</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center mb-5">
+    <div class="col-xs-auto col-5 text-center">
+        Hello and welcome to Scrubby, a personal project by bobbah.
+        <br/>
+        <br/>
+        Feel free to discuss any issues, concerns, or ideas with me through Discord (@@bobbah).
+    </div>
+</div>

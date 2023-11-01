@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Manage Announcements";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Announcements</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;">
+                <h1>Manage Announcements</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Message</th>
+                <th>Start (Local)</th>
+                <th>End (Local)</th>
+                <th>Status</th>
+                <th>
+                    <button type="button" id="add-announce-btn" class="btn btn-sm btn-success">New</button>
+                </th>
+            </tr>
+            </thead>
+            <tbody id="announcement-table">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let messages = {};
+    let currentNew = 0;
+    
+    $(document).ready(() => {
+        refreshData();
+        
+        $('#add-announce-btn').click(e => {
+            e.preventDefault();
+            const newId = currentNew;
+            currentNew--;
+            $('#announcement-table').append($(`
+                <tr id="a${newId}-row" class="announce-row">
+                    <td><input id="a${newId}-message" type="text" class="form-control" /></td>
+                    <td><input id="a${newId}-start" type="datetime-local" class="form-control" /></td>
+                    <td><input id="a${newId}-end" type="datetime-local" class="form-control" /></td>
+                    <td>${activeSelect({ id: newId, active: false })}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary create-btn" data-aid="${newId}">Create</button>
+                    </td>
+                </tr>
+            `));
+            
+            $(`#a${newId}-row button.create-btn`).click(e => {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("CreateAnnouncement", "Announcement")",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    data: JSON.stringify(getValues(newId)),
+                    success: refreshData
+                });
+            });
+        });
+    });
+    
+    const refreshData = () => {
+        $.ajax({
+            url: "@Url.Action("GetAnnouncements", "Announcement")",
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: (data) => {
+                messages = data.reduce((a, x) => ({...a, [x.id]: x}), {});
+                renderData(data);
+            }
+        });
+    };
+    
+    const renderData = (data) => {
+        $('#announcement-table')
+            .empty()
+            .append($(data.map(x => `
+                <tr id="a${x.id}-row" class="announce-row">
+                    <td><input id="a${x.id}-message" type="text" class="form-control" value="${x.message}" /></td>
+                    <td><input id="a${x.id}-start" type="datetime-local" class="form-control" value="${x.start && moment(x.start).format('YYYY-MM-DDTHH:mm') || ''}" /></td>
+                    <td><input id="a${x.id}-end" type="datetime-local" class="form-control" value="${x.end && moment(x.end).format('YYYY-MM-DDTHH:mm') || ''}" /></td>
+                    <td>${activeSelect(x)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary save-btn" data-aid="${x.id}">Save</button>
+                        <button type="button" class="btn btn-sm btn-danger delete-btn" data-aid="${x.id}">Delete</button>
+                    </td>
+                </tr>`).join('')));
+        
+        $('tr.announce-row > td > button.save-btn').click(e => {
+            e.preventDefault();
+            const id = $(e.target).attr('data-aid');
+            $.ajax({
+                type: "PUT",
+                url: "@Url.Action("UpdateAnnouncement", "Announcement")",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(getValues(id)),
+                success: updateValues
+            });
+        });
+        
+        $('tr.announce-row > td > button.delete-btn').click(e => {
+            e.preventDefault();
+            const id = $(e.target).attr('data-aid');
+            $.ajax({
+                type: "DELETE",
+                url: "@Url.Action("DeleteAnnouncement", "Announcement")",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(getValues(id)),
+                success: () => {
+                    $(`#a${id}-row`).remove();
+                }
+            });
+        });
+    };
+    
+    const getValues = (id) => {
+        let toReturn = {
+            id: id, 
+            message: $(`#a${id}-message`).val(),
+            start: $(`#a${id}-start`).val(),
+            end: $(`#a${id}-end`).val(),
+            active: $(`#a${id}-status`).val() === "1"
+        }
+        
+        if (toReturn.start !== null)
+            toReturn.start = moment(toReturn.start).utc();
+        if (toReturn.end !== null)
+            toReturn.end = moment(toReturn.end).utc();
+        
+        return toReturn;
+    };
+    
+    const updateValues = (values) => {
+        if (messages[values.id] === undefined) {
+            refreshData();
+            return;
+        }
+        
+        $(`#a${values.id}-message`).val(values.message);
+        $(`#a${values.id}-start`).val(values.start && moment(values.start).format('YYYY-MM-DDTHH:mm') || '');
+        $(`#a${values.id}-end`).val(values.end && moment(values.end).format('YYYY-MM-DDTHH:mm') || '');
+        $(`#a${values.id}-status`).val(values.active ? "1" : "0");
+    }
+    
+    const activeSelect = (data) => {
+        return `
+            <select id="a${data.id}-status" class="custom-select">
+                <option ${data.active ? "selected" : ""} value="1">Active</option>
+                <option ${data.active ? "" : "selected"} value="0">Inactive</option>
+            </select>`;
+    };
+</script>

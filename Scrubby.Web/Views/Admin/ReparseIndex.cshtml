@@ -1,0 +1,104 @@
+@{
+    ViewData["Title"] = "Re-parse Rounds";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Re-parse Rounds</li>
+    </ol>
+</nav>
+
+<div id="message-container">
+
+</div>
+
+<div class="container mb-2">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;">
+                <h1>Re-parse Rounds</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container d-flex flex-column">
+    <form class="row" id="controls">
+        <div class="col-6">
+            <input type="text" class="form-control" id="operationInput" placeholder="Operation Input"/>
+        </div>
+        <div class="col-4">
+            <select class="form-select" id="operationType">
+                <option value="ids">ID List</option>
+                <option value="file">By File</option>
+            </select>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-primary mb-2" id="submitOperation">Submit</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#controls').submit(function(event) {
+            event.preventDefault();
+            performOperation();
+        });
+    });
+
+    function performOperation() {
+        const opInput = $('#operationInput').val();
+        const opType = $('#operationType').val();
+        
+        if (opType === 'ids')
+            idsOp(opInput.split(',').map((val) => parseInt(val.trim())));
+        else
+            fileOp(opInput.trim());
+    }
+    
+    function idsOp(ids) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ReparseRoundById")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            success: function() {
+                $('#message-container').append($(getAlert('Successfully set rounds to be re-parsed', 'success')));
+            },
+            error: function(data) {
+                $('#message-container').append($(getAlert(data.responseText, 'danger')));
+            },
+            data: JSON.stringify({ ids: ids, deleteFiles: true })
+        });
+    }
+    
+    function fileOp(file) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("ReparseRoundByFile")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            success: function() {
+                $('#message-container').append($(getAlert('Successfully set rounds to be re-parsed', 'success')));
+            },
+            error: function(data) {
+                $('#message-container').append($(getAlert(data.responseText, 'danger')));
+            },
+            data: JSON.stringify({ filename: file })
+        });
+    }
+
+    function getAlert(alertText, alertType) {
+        return `<div class="alert alert-${alertType} alert-dismissible fade show" role="alert"><button type="button" class="btn-close" data-bs-dismiss="alert"></button>${alertText}</div>`;
+    }
+</script>

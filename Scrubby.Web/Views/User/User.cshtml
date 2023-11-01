@@ -1,0 +1,57 @@
+﻿@using Tgstation.Auth
+@using System.Security.Claims
+@{
+    ViewData["Title"] = $"{User.Identity?.Name}";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@($"{User.Identity?.Name}")</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto mb-3">
+            <div style="text-align: center;">
+                <h1>@(User.Identity?.Name)</h1>
+                <a asp-controller="Auth" asp-action="Logout" class="badge bg-warning align-top">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3>Basic Info</h3>
+<ul class="list-group">
+    <li class="list-group-item list-group-item-action">
+        <div class="container">
+            <div class="row">
+                <div class="col vert-right text-end col-1">
+                    <p class="text-muted mb-0">TG Data</p>
+                </div>
+                <div class="col">
+                    <b>Forum Username: </b> @User.Identity?.Name <br/>
+                    <b>Byond Key: </b> @User.Claims.FirstOrDefault(x => x.Type == TgClaimTypes.ByondKey)?.Value <br/>
+                    <b>Byond CKey: </b> @User.Claims.FirstOrDefault(x => x.Type == TgClaimTypes.ByondCKey)?.Value <br/>
+                </div>
+            </div>
+        </div>
+    </li>
+    <li class="list-group-item list-group-item-action">
+        <div class="container">
+            <div class="row">
+                <div class="col vert-right text-end col-1">
+                    <p class="text-muted mb-0">Scrubby Data</p>
+                </div>
+                <div class="col">
+                    <p class="mb-0">
+                        <b>Roles: </b> @(string.Join(", ", User.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value))) <br/>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </li>
+</ul>

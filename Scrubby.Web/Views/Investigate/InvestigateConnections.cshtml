@@ -1,0 +1,189 @@
+﻿@{
+    ViewData["Title"] = "Investigate | Connections";
+}
+
+<script>var clipboard = new ClipboardJS('.copy-link');</script>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Gateway</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Investigate" asp-action="Index">Investigate</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Connections</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-auto order-last order-md-2">
+            <div style="text-align: center;" >
+                <h1>Investigate Connections</h1>
+            </div>
+        </div>
+    </div>
+</div>
+<br/>
+
+<form class="row g-3 mb-3">
+    <div class="col-12">
+        <label class="form-label" for="CKeys">List of CKey[s] to Search For</label>
+        <input type="text" class="form-control" placeholder="CKeys" id="CKeys"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="limit">Limit Rounds Returned [opt.]</label>
+        <input type="number" class="form-control" id="limit" min="1"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="startingRound">Starting Round [opt.]</label>
+        <input type="number" class="form-control" id="startingRound" min="0"/>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <label class="form-label" for="sortOrder">Limit Direction [opt.]</label>
+        <select class="form-select" id="sortOrder">
+            <option value="gte">Greater Than/Equal</option>
+            <option value="lte">Less Than/Equal</option>
+        </select>
+    </div>
+    <div class="col-6 col-md-3 d-flex flex-column justify-content-end">
+        <button type="button" class="btn btn-primary form-control" id="submit-search">Submit</button>
+    </div>
+</form>
+
+<div id="resultsContainer">
+
+</div>
+
+<style>
+    .tagify__tag > div { line-height: 1; }
+
+    .tagify__input { line-height: 1; }
+
+    .chart {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        width: 100%;
+    }
+
+    .y.axis > .tick > text { font-size: 1.25rem; }
+
+    .x.axis > .tick > text { font-size: 0.75rem; }
+
+    .bar { fill: #33b5e5; }
+</style>
+
+<script>
+    var ckeysList = [];
+    var tagify = null;
+    const roundTemplate = ({ round, started, ended }) => `
+        <div class="card mb-2" id="c${round}">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-6 my-auto">
+                        <h4 style="margin-bottom: 0;">${round}</h4>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-primary float-end round-data-submit" data-round="${round}" data-started="${started}" data-ended="${ended}">Fetch Connections</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body"></div>
+        </div>
+    `;
+
+    $(document).ready(function() {
+        tagify = new Tagify(document.querySelector('#CKeys'));
+
+        $('#submit-search').click(function() {
+            $('#resultsContainer').empty();
+
+            ckeysList = [];
+            tagify.value.forEach(function(elem) {
+                ckeysList.push(elem.value);
+            });
+
+            var dataObj = {
+                CKeys: ckeysList,
+                Limit: parseInt($('#limit').val()),
+                GTERound: ($('#sortOrder').val() == "gte"),
+                StartingRound: parseInt($('#startingRound').val())
+            };
+
+            var rounds = $.ajax({
+                type: "POST",
+                url: "@(Url.Action("GetRoundsForCKeys"))",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("RequestVerificationToken",
+                        $('input:hidden[name="__RequestVerificationToken"]').val());
+                },
+                dataType: "json",
+                data: JSON.stringify(dataObj)
+            });
+
+            $.when(rounds).done(function(data) {
+                console.log(JSON.stringify(data));
+                processResults(data);
+            });
+        });
+    });
+
+    function processResults(data) {
+        var cont = $('#resultsContainer');
+
+        data.forEach(function(elem) {
+            cont.append($.parseHTML([{ round: elem.round, started: elem.started, ended: elem.ended }].map(roundTemplate).join('')));
+        });
+
+        $('.round-data-submit').click(function() {
+            getConnectionData($(this).data('round'), $(this).data('started'), $(this).data('ended'));
+        });
+    }
+
+    function getConnectionData(round, start, end) {
+        var dataObj = {
+            Round: round,
+            CKeyFilter: ckeysList
+        };
+
+        var connections = $.ajax({
+            type: "POST",
+            url: "@Url.Action("GetConnectionsForRound")",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("RequestVerificationToken",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            dataType: "json",
+            data: JSON.stringify(dataObj)
+        });
+
+        $.when(connections).done(function(data) {
+            processConnections(data, round, start, end);
+        });
+    }
+
+    function processConnections(data, round, roundStart, roundEnd) {
+        var tasks = [];
+
+        data.forEach(function(elem) {
+            tasks.push({
+                "startDate": moment.utc(elem.connectTime).toDate(),
+                "endDate": moment.utc(elem.disconnectTime).toDate(),
+                "taskName": elem.cKey.cleaned,
+                "taskStatus": "CONNNECTED"
+            });
+        });
+
+        var taskNames = ckeysList;
+        var taskStatus = ["CONNECTED"];
+        var elem = $("#c" + round + " > .card-body");
+        elem.empty();
+
+        var chart = d3.gantt().taskTypes(taskNames).taskStatus(taskStatus).selector("#c" + round + " > .card-body").width(elem.width() - 195).height(100 + taskNames.length * 40);
+        chart.timeDomainMode("fixed").timeDomain([moment.utc(roundStart).toDate(), moment.utc(roundEnd).toDate()]);
+        chart(tasks);
+    }
+</script>

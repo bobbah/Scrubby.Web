@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <UserSecretsId>0928caad-0ee4-4f6b-b390-7f068139e559</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <ContainerRepository >ghcr.io/bobbah/scrubby.web</ContainerRepository >
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.0.123" />
+        <PackageReference Include="DMISharp" Version="1.7.0" />
+        <PackageReference Include="LigerShark.WebOptimizer.Core" Version="3.0.372" />
+        <PackageReference Include="Markdig" Version="0.30.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.0" />
+        <PackageReference Include="MimeMapping" Version="1.0.1.50" />
+        <PackageReference Include="MinVer" Version="4.3.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+        <PackageReference Include="NodaTime.Serialization.JsonNet" Version="3.0.1" />
+        <PackageReference Include="Npgsql" Version="7.0.0" />
+        <PackageReference Include="RestEase" Version="1.6.1" />
+        <PackageReference Include="RestEase.HttpClientFactory" Version="1.6.1" />
+        <PackageReference Include="RestSharp" Version="108.0.3" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+        <PackageReference Include="Tgstation.Auth" Version="1.0.0" />
+        <PackageReference Include="WebStoating.Markdig.Prism" Version="1.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Views\FAQ\FAQ.md">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="wwwroot\robots.txt">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+</Project>
