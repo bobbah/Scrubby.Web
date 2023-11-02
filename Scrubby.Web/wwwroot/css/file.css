@@ -26,6 +26,10 @@ table.logmessage-table > tbody > tr > td {
 
 /* Log Line Colors */
 
+table:not(.table-striped) > tbody > tr.logmessage > td {
+    background-color: transparent;
+}
+
 table:not(.table-striped) > tbody > tr.logmessage-game {
     background-color: #e2ffd6;
 }
