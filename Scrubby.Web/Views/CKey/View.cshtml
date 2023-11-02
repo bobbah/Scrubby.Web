@@ -363,46 +363,39 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [
-                            {
-                                stacked: true,
-                                type: 'time',
+                        x: {
+                            stacked: true,
+                            type: 'time',
+                            display: true,
+                            title: {
+                                display: false,
+                                text: 'Time'
+                            },
+                            ticks: {
+                                major: {
+                                    fontStyle: 'bold'
+                                },
+                                maxTicksLimit: 15
+                            },
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'MMM D, YYYY'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
                                 display: true,
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Time'
-                                },
-                                ticks: {
-                                    major: {
-                                        fontStyle: 'bold'
-                                    },
-                                    maxTicksLimit: 15
-                                },
-                                time: {
-                                    unit: 'day',
-                                    tooltipFormat: 'MMM D, YYYY'
-                                }
+                                text: dataLabel
+                            },
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0,
+                                maxTicksLimit: 5
                             }
-                        ],
-                        yAxes: [
-                            {
-                                stacked: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: dataLabel
-                                },
-                                ticks: {
-                                    beginAtZero: true,
-                                    precision: 0,
-                                    maxTicksLimit: 5
-                                }
-                            }
-                        ]
+                        }
                     },
-                    legend: {
-                        display: true
-                    },
-                    tooltips: {
+                    interaction: {
                         mode: 'index',
                         intersect: false
                     }
@@ -419,20 +412,21 @@
                     labels: @Html.Raw(namesLabels),
                     datasets: [
                         {
-                            label: 'Names',
+                            label: 'Instances',
                             data: @Html.Raw(namesValues),
                             borderWidth: 1
                         }
                     ]
                 },
                 options: {
+                    aspectRatio: 2,
                     plugins: {
                         colorschemes: {
                             scheme: 'brewer.Paired12'
+                        },
+                        legend: {
+                            display: false
                         }
-                    },
-                    legend: {
-                        display: false
                     }
                 }
             });
