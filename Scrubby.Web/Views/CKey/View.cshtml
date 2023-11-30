@@ -275,11 +275,26 @@
         });
     }
 
+    // from ChartJS' source for the colors plugin
+    const BORDER_COLORS = [
+      'rgb(54, 162, 235)', // blue
+      'rgb(255, 99, 132)', // red
+      'rgb(255, 159, 64)', // orange
+      'rgb(255, 205, 86)', // yellow
+      'rgb(75, 192, 192)', // green
+      'rgb(153, 102, 255)', // purple
+      'rgb(201, 203, 207)' // grey
+    ];
+    
+    // Border colors with 50% transparency
+    const BACKGROUND_COLORS = /* #__PURE__ */ BORDER_COLORS.map(color => color.replace('rgb(', 'rgba(').replace(')', ', 0.5)'));
+    
     function processConnectionHeaderData(data, dataElement, dataLabel) {
         let chartData = { datasets: [] };
         let srvMap = {};
         let dataMap = [];
         let i = 0;
+        let ci = 0;
         let earliest = moment().startOf('day');
 
         data.forEach(function(elem) {
@@ -296,8 +311,13 @@
                 ];
                 chartData.datasets[i] = {
                     label: elem.server,
-                    data: []
+                    data: [],
+                    backgroundColor: elem.server === 'Sybil' && 'rgba(77, 194, 135, 0.5)' || BACKGROUND_COLORS[ci % BACKGROUND_COLORS.length],
+                    borderColor: elem.server === 'Sybil' && 'rgba(77, 194, 135)' || BORDER_COLORS[ci % BORDER_COLORS.length],
                 };
+                
+                if (elem.server !== 'Sybil')
+                    ci++;
                 i++;
             } else {
                 dataMap[srvMap[elem.server]].push({
@@ -340,6 +360,7 @@
             }
         }
 
+        console.log([chartData,  dataLabel]);
         drawConnectionsChart(chartData, dataLabel);
     }
     
@@ -356,9 +377,7 @@
                 data: data,
                 options: {
                     plugins: {
-                        colorschemes: {
-                            scheme: 'brewer.Paired12'
-                        }
+                        colors: { enabled: true }
                     },
                     responsive: true,
                     maintainAspectRatio: false,
