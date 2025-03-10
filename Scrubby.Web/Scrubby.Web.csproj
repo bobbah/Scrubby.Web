@@ -4,7 +4,10 @@
         <UserSecretsId>0928caad-0ee4-4f6b-b390-7f068139e559</UserSecretsId>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <ContainerRepository>ghcr.io/bobbah/scrubby.web</ContainerRepository>
+        <ContainerUser>app</ContainerUser>
+        <ContainerWorkingDirectory>/app</ContainerWorkingDirectory>
         <ContainerEntrypoint>dotnet Scrubby.Web.dll</ContainerEntrypoint>
+        <ContainerChmod>true</ContainerChmod>
     </PropertyGroup>
 
     <ItemGroup>
