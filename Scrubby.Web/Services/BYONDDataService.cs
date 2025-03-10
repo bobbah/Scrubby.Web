@@ -90,11 +90,6 @@ public class BYONDUserNotFoundException : Exception
     public BYONDUserNotFoundException(string message, Exception inner) : base(message, inner)
     {
     }
-
-    protected BYONDUserNotFoundException(SerializationInfo info,
-        StreamingContext context) : base(info, context)
-    {
-    }
 }
 
 public class BYONDUserInactiveException : Exception
@@ -108,11 +103,6 @@ public class BYONDUserInactiveException : Exception
     }
 
     public BYONDUserInactiveException(string message, Exception inner) : base(message, inner)
-    {
-    }
-
-    protected BYONDUserInactiveException(SerializationInfo info,
-        StreamingContext context) : base(info, context)
     {
     }
 }

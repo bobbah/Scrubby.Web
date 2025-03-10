@@ -19,6 +19,7 @@ using Scrubby.Web.Services.Interfaces;
 using Scrubby.Web.Services.SQL;
 using Scrubby.Web.Stockpile;
 using Tgstation.Auth;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace Scrubby.Web;
 
