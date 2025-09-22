@@ -10,15 +10,8 @@ namespace Scrubby.Web.Controllers;
 
 [ApiController]
 [Route("api/population")]
-public class ServerConnectionController : Controller
+public class ServerConnectionController(IConnectionService connections) : Controller
 {
-    private readonly IConnectionService _connections;
-
-    public ServerConnectionController(IConnectionService connections)
-    {
-        _connections = connections;
-    }
-
     [HttpPost("round")]
     public async Task<IActionResult> GetPopulationForRound(JObject data)
     {
@@ -28,9 +21,9 @@ public class ServerConnectionController : Controller
         var population = new Dictionary<DateTime, int>();
         var events = new Dictionary<DateTime, int>();
 
-        var connections = (await _connections.GetConnectionsForRound((int)round)).ToList();
+        var connections1 = (await connections.GetConnectionsForRound((int)round)).ToList();
 
-        foreach (var connection in connections)
+        foreach (var connection in connections1)
         {
             if (events.ContainsKey(connection.ConnectTime))
                 events[connection.ConnectTime]++;

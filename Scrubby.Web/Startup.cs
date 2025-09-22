@@ -23,14 +23,9 @@ using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 namespace Scrubby.Web;
 
-public class Startup
+public class Startup(IConfiguration configuration)
 {
-    public Startup(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
-
-    public IConfiguration Configuration { get; }
+    public IConfiguration Configuration { get; } = configuration;
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -121,7 +116,6 @@ public class Startup
         services.AddTransient<INewscasterService, SqlNewscasterService>();
         services.AddTransient<IScrubbyService, SqlScrubbyService>();
         services.AddTransient<IFileService, SqlFileService>();
-        services.AddTransient<IMaintenanceService, SqlMaintenanceService>();
         services.AddTransient<BYONDDataService>();
         services.AddSingleton<IClaimsTransformation, ScrubbyUserClaimsTransformation>();
         services.AddRestEaseClient<IStockpileApi>(Configuration.GetValue<string>("Stockpile:Url"), new()
@@ -162,7 +156,6 @@ public class Startup
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
-        
 
         app.UseEndpoints(endpoints =>
         {

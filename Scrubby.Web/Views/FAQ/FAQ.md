@@ -57,39 +57,7 @@ ckey-highlighting feature described above applied and will have the user highlig
 
 ##### Files
 
-The format: `https://scrubby.melonmesa.com/round/<ROUND_ID_HERE>/files`
-
-The files area of Scrubby is probably one of the most undocumented-feature rich areas of the website. By default, this
-area would be reached by clicking on a log file link from a round page. Within this page, you will have all of the
-messages from that log file listed, color-coded for easier reading. Note that this color-coding can be disabled in favor
-of the 'old' formatting by a toggle switch at the top of the page.
-
-++Undocumented Features++:
-
-Perhaps the most useful feature is to be able to *interleave multiple files from a round* by adding additional file
-parameters to the URL.
-
-`https://scrubby.melonmesa.com/round/<ROUND_ID_HERE>/files?file=<FILE_NAME.TXT>&file=<FILE_NAME.TXT>`
-
-This is done automagically^tm^ based on the timestamp and relative position of the log message line.
-
-As well as this, you can specify a ckey or name to search for within the log file, showing only lines that are a
-positive match to that term...
-
-`https://scrubby.melonmesa.com/round/<ROUND_ID_HERE>/files?file=<FILE_NAME.TXT>&ckey=<TERM_GOES_HERE>`
-
-You can also, if viewing ++a single file++ (support to be added for multiple files soon), specify a range or ranges of
-lines to show, which is great for creating links to be posted elsewhere.
-
-`https://scrubby.melonmesa.com/round/<ROUND_ID_HERE>/files?file=<FILE_NAME.TXT>&range=<[LOWER]-[UPPER]>`
-
-The formatting of this range is important, so make sure to follow the format of two numbers separated by a hyphen.
-
-Now, to find these numbers, simply mouse over the timestamp and you will see a tag, like `GAME-56`, this would then be
-line 56.
-
-To link other users to an individual line in a log file query, you can simply click the timestamp to copy a
-line-specific link to your clipboard!
+The files service is now discontinued as of September 2025.
 
 ##### Images
 
@@ -117,4 +85,4 @@ information about that sprite in particular, rendered images of that sprite, and
 # Scrubby API
 
 The Scrubby API has been discontinued as of June 27, 2021. If you were using this service and would still like to have
-access to data stored in Scrubby, please contact ``bobbahbrown#0001`` on Discord.
+access to data stored in Scrubby, please contact ``bobbah`` on Discord.

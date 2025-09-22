@@ -1,6 +1,5 @@
 ﻿@using System.Security.Claims
 @using Scrubby.Web.Services.Interfaces
-@using Scrubby.Web.ViewComponents
 @inject IAppStatusService AppStatus
 
 <!DOCTYPE html>
@@ -49,9 +48,6 @@
                 {
                     <li class="nav-item">
                         <a asp-controller="Announcement" asp-action="ManageAnnouncements" class="nav-link">Announcements</a>
-                    </li>
-                    <li class="nav-item">
-                        <a asp-controller="Admin" asp-action="ReparseIndex" class="nav-link">Re-parse Rounds</a>
                     </li>
                 }
                 <li class="nav-item">

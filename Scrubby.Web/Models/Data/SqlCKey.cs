@@ -12,8 +12,5 @@ public class SqlCKey
     public bool UserNotFound { get; set; }
     public bool UserInactive { get; set; }
 
-    public static string SanitizeKey(string raw)
-    {
-        return CKeyInvalidCharacters.Replace(raw.ToLower(), "");
-    }
+    public static string SanitizeKey(string raw) => CKeyInvalidCharacters.Replace(raw.ToLower(), "");
 }

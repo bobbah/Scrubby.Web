@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
@@ -22,8 +21,5 @@ public class ErrorController : Controller
     }
 
     [HttpGet("error")]
-    public IActionResult GenericError(int statusCode)
-    {
-        return View("GenericError", new ErrorModel() { StatusCode = statusCode, TraceIdentifier = HttpContext.TraceIdentifier });
-    }
+    public IActionResult GenericError(int statusCode) => View("GenericError", new ErrorModel() { StatusCode = statusCode, TraceIdentifier = HttpContext.TraceIdentifier });
 }

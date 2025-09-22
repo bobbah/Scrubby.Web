@@ -4,19 +4,12 @@ using Scrubby.Web.Services.Interfaces;
 
 namespace Scrubby.Web.Controllers;
 
-public class NewscasterController : Controller
+public class NewscasterController(INewscasterService newscaster) : Controller
 {
-    private readonly INewscasterService _newscaster;
-
-    public NewscasterController(INewscasterService newscaster)
-    {
-        _newscaster = newscaster;
-    }
-
     [HttpGet("round/{roundID}/newscaster")]
     public async Task<IActionResult> GetRound(int roundID)
     {
-        var model = await _newscaster.GetRound(roundID);
+        var model = await newscaster.GetRound(roundID);
         return model == null ? NotFound() : View(model);
     }
 }

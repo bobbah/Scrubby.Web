@@ -46,18 +46,9 @@ public class SqlUserService : SqlServiceBase, IUserService
         return user;
     }
 
-    public async Task<ScrubbyUser> CreateUser(ScrubbyUser user)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<ScrubbyUser> CreateUser(ScrubbyUser user) => throw new NotImplementedException();
 
-    public async Task<ScrubbyUser> UpdateUser(ScrubbyUser user)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<ScrubbyUser> UpdateUser(ScrubbyUser user) => throw new NotImplementedException();
 
-    public async Task<bool> DeleteUser(ScrubbyUser user)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<bool> DeleteUser(ScrubbyUser user) => throw new NotImplementedException();
 }

@@ -14,10 +14,7 @@ public class CKey : IEquatable<CKey>, IComparable<CKey>
     public string Raw { get; }
     public string Cleaned { get; }
 
-    public int CompareTo(CKey other)
-    {
-        return Cleaned.CompareTo(other.Cleaned);
-    }
+    public int CompareTo(CKey other) => Cleaned.CompareTo(other.Cleaned);
 
     public bool Equals(CKey other)
     {
@@ -39,10 +36,7 @@ public class CKey : IEquatable<CKey>, IComparable<CKey>
         return null;
     }
 
-    public override bool Equals(object obj)
-    {
-        return Equals(obj as CKey);
-    }
+    public override bool Equals(object obj) => Equals(obj as CKey);
 
     public static bool operator ==(CKey lhs, CKey rhs)
     {
@@ -51,23 +45,11 @@ public class CKey : IEquatable<CKey>, IComparable<CKey>
         return lhs.Equals(rhs);
     }
 
-    public static bool operator !=(CKey lhs, CKey rhs)
-    {
-        return !(lhs == rhs);
-    }
+    public static bool operator !=(CKey lhs, CKey rhs) => !(lhs == rhs);
 
-    public override string ToString()
-    {
-        return Cleaned;
-    }
+    public override string ToString() => Cleaned;
 
-    public override int GetHashCode()
-    {
-        return Cleaned.GetHashCode();
-    }
+    public override int GetHashCode() => Cleaned.GetHashCode();
 
-    public static implicit operator CKey(string input)
-    {
-        return new CKey(input);
-    }
+    public static implicit operator CKey(string input) => new(input);
 }

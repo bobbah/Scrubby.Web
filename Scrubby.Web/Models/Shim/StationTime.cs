@@ -9,20 +9,11 @@ public class StationTime : IEquatable<StationTime>, IComparable<StationTime>
     public int Minutes => _Seconds / 60 % 60;
     public int Hours => _Seconds / 3600 % 24;
 
-    public int CompareTo(StationTime other)
-    {
-        return _Seconds.CompareTo(other._Seconds);
-    }
+    public int CompareTo(StationTime other) => _Seconds.CompareTo(other._Seconds);
 
-    public bool Equals(StationTime other)
-    {
-        return _Seconds == other._Seconds;
-    }
+    public bool Equals(StationTime other) => _Seconds == other._Seconds;
 
-    public override int GetHashCode()
-    {
-        return _Seconds.GetHashCode();
-    }
+    public override int GetHashCode() => _Seconds.GetHashCode();
 
     public static bool operator ==(StationTime left, StationTime right)
     {
@@ -31,18 +22,9 @@ public class StationTime : IEquatable<StationTime>, IComparable<StationTime>
         return left.Equals(right);
     }
 
-    public static bool operator !=(StationTime left, StationTime right)
-    {
-        return !(left == right);
-    }
+    public static bool operator !=(StationTime left, StationTime right) => !(left == right);
 
-    public override string ToString()
-    {
-        return $"{Hours: 00}:{Minutes: 00}:{Seconds: 00}";
-    }
+    public override string ToString() => $"{Hours: 00}:{Minutes: 00}:{Seconds: 00}";
 
-    public override bool Equals(object obj)
-    {
-        return Equals(obj as StationTime);
-    }
+    public override bool Equals(object obj) => Equals(obj as StationTime);
 }

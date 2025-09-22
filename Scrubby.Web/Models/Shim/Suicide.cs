@@ -15,9 +15,5 @@ public class Suicide
     public bool RoundStart { get; set; }
     public bool Antagonist { get; set; }
 
-    public override string ToString()
-    {
-        return
-            $"[{RoundID}] {CKey.Raw} [{CKey.Cleaned}] killed themselves at {Timestamp} [R: {RelativeTime}] ({OriginName} {Origin})";
-    }
+    public override string ToString() => $"[{RoundID}] {CKey.Raw} [{CKey.Cleaned}] killed themselves at {Timestamp} [R: {RelativeTime}] ({OriginName} {Origin})";
 }

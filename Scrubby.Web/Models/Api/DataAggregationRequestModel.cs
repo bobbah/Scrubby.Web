@@ -14,9 +14,5 @@ public class DataAggregationRequestModel
     public bool GroupByRound { get; set; }
     public bool NoMetadata { get; set; }
 
-    public override string ToString()
-    {
-        return
-            $"Upper: {UpperRoundLimit}, \nLower: {LowerRoundLimit}, \nType Filters: [{string.Join(", ", TypeFilters)}], \nContentFilter: {ContentFilter}, \nFiles: [{string.Join(", ", Files)}], \nResponse Limit: {ResponseLimit}, \nGroup By Round: {GroupByRound}, \nNo Metadata: {NoMetadata}";
-    }
+    public override string ToString() => $"Upper: {UpperRoundLimit}, \nLower: {LowerRoundLimit}, \nType Filters: [{string.Join(", ", TypeFilters)}], \nContentFilter: {ContentFilter}, \nFiles: [{string.Join(", ", Files)}], \nResponse Limit: {ResponseLimit}, \nGroup By Round: {GroupByRound}, \nNo Metadata: {NoMetadata}";
 }

@@ -4,17 +4,7 @@ using Scrubby.Web.Services.Interfaces;
 
 namespace Scrubby.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IScrubbyService scrubby) : Controller
 {
-    private readonly IScrubbyService _scrubby;
-
-    public HomeController(IScrubbyService scrubby)
-    {
-        _scrubby = scrubby;
-    }
-
-    public async Task<IActionResult> Index()
-    {
-        return View(await _scrubby.GetBasicStats());
-    }
+    public async Task<IActionResult> Index() => View(await scrubby.GetBasicStats());
 }

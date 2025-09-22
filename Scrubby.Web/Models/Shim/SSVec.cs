@@ -15,13 +15,7 @@ public class SSVec : IEquatable<SSVec>
     public int Y { get; set; }
     public int Z { get; set; }
 
-    public bool Equals(SSVec other)
-    {
-        return X == other.X && Y == other.Y && Z == other.Z;
-    }
+    public bool Equals(SSVec other) => X == other.X && Y == other.Y && Z == other.Z;
 
-    public override string ToString()
-    {
-        return $"({X}, {Y}, {Z})";
-    }
+    public override string ToString() => $"({X}, {Y}, {Z})";
 }

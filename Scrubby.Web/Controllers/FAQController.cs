@@ -22,13 +22,7 @@ public class FAQController : Controller
     }
 
     [ResponseCache(Duration = 300)]
-    private static async Task<string> GetFAQMarkdown()
-    {
-        return await System.IO.File.ReadAllTextAsync(@"Views/FAQ/FAQ.md");
-    }
+    private static async Task<string> GetFAQMarkdown() => await System.IO.File.ReadAllTextAsync(@"Views/FAQ/FAQ.md");
 
-    public IActionResult SecurityPolicy()
-    {
-        return View("SecurityPolicy");
-    }
+    public IActionResult SecurityPolicy() => View("SecurityPolicy");
 }

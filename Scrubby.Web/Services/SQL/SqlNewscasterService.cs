@@ -7,8 +7,5 @@ namespace Scrubby.Web.Services.SQL;
 
 public class SqlNewscasterService : INewscasterService
 {
-    public async Task<NewsCasterModel> GetRound(int round)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<NewsCasterModel> GetRound(int round) => throw new NotImplementedException();
 }

@@ -5,20 +5,10 @@ using Scrubby.Web.Services.Interfaces;
 
 namespace Scrubby.Web.Controllers;
 
-public class SearchController : Controller
+public class SearchController(IPlayerService players) : Controller
 {
-    private readonly IPlayerService _players;
-
-    public SearchController(IPlayerService players)
-    {
-        _players = players;
-    }
-
     [HttpGet("search/player")]
-    public IActionResult PlayerIndex()
-    {
-        return View("PlayerIndex");
-    }
+    public IActionResult PlayerIndex() => View("PlayerIndex");
 
     [HttpPost("api/search/player")]
     public async Task<IActionResult> ExecutePlayerSearch([FromBody] PlayerSearchPostModel model)
@@ -32,8 +22,8 @@ public class SearchController : Controller
         if (model.Regex.ToString().Length < 3)
             return StatusCode(400, "Regex pattern too short, restrict to between 3-50 characters.");
 
-        if (model.SearchType == PlayerSearchType.ICName)
-            return Ok(await _players.SearchForICName(model.Regex));
-        return Ok(await _players.SearchForCKey(model.Regex));
+        return model.SearchType == PlayerSearchType.ICName
+            ? Ok(await players.SearchForICName(model.Regex))
+            : Ok(await players.SearchForCKey(model.Regex));
     }
 }

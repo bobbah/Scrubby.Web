@@ -11,22 +11,22 @@
     <ItemGroup>
         <PackageReference Include="Dapper" Version="2.1.66"/>
         <PackageReference Include="DMISharp" Version="2.1.0"/>
-        <PackageReference Include="LigerShark.WebOptimizer.Core" Version="3.0.433"/>
-        <PackageReference Include="Markdig" Version="0.40.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.13"/>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.13"/>
+        <PackageReference Include="LigerShark.WebOptimizer.Core" Version="3.0.477" />
+        <PackageReference Include="Markdig" Version="0.42.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.9" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.9" />
         <PackageReference Include="MimeMapping" Version="3.1.0"/>
         <PackageReference Include="MinVer" Version="6.0.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NodaTime.Serialization.JsonNet" Version="3.2.0"/>
         <PackageReference Include="Npgsql" Version="9.0.3"/>
         <PackageReference Include="RestEase" Version="1.6.4"/>
         <PackageReference Include="RestEase.HttpClientFactory" Version="1.6.4"/>
         <PackageReference Include="RestSharp" Version="112.1.0"/>
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
         <PackageReference Include="Tgstation.Auth" Version="1.1.0"/>
         <PackageReference Include="WebStoating.Markdig.Prism" Version="1.0.0"/>
     </ItemGroup>

@@ -23,10 +23,7 @@ public class Round : IEquatable<Round>
     public List<ProcessStatus> Status { get; set; }
     public RoundBuildInfo VersionInfo { get; set; }
 
-    public bool Equals(Round other)
-    {
-        return ID == other.ID;
-    }
+    public bool Equals(Round other) => ID == other.ID;
 
     public bool HasFile(string file)
     {
@@ -40,10 +37,7 @@ public class Round : IEquatable<Round>
         return Status.FirstOrDefault(x => x.Process == process);
     }
 
-    public override string ToString()
-    {
-        return ID.ToString();
-    }
+    public override string ToString() => ID.ToString();
 
     public class RoundPlayer : IEquatable<RoundPlayer>
     {
@@ -56,13 +50,11 @@ public class Round : IEquatable<Round>
         public string CleanKey { get; set; }
 
         public bool Equals(RoundPlayer other) // this should be changed
-        {
-            return Name == other.Name;
-        }
+            =>
+                Name == other.Name;
 
         public override int GetHashCode() // this should be changed
-        {
-            return Name.GetHashCode();
-        }
+            =>
+                Name.GetHashCode();
     }
 }

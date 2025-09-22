@@ -7,31 +7,22 @@ using Scrubby.Web.Services.Interfaces;
 
 namespace Scrubby.Web.Controllers;
 
-public class ImageController : Controller
+public class ImageController(IFileService files, IFileContentService fileContent) : Controller
 {
-    private readonly IFileService _files;
-    private readonly IFileContentService _fileContent;
-
-    private readonly List<string> _validPictures = new()
-    {
+    private readonly List<string> _validPictures =
+    [
         "png",
         "jpeg",
         "jpg"
-    };
-
-    public ImageController(IFileService files, IFileContentService fileContent)
-    {
-        _files = files;
-        _fileContent = fileContent;
-    }
+    ];
 
     [HttpGet("image/{id:int}")]
     public async Task<FileStreamResult> FetchImage(int id)
     {
-        var f = await _files.GetFile(id);
+        var f = await files.GetFile(id);
         if (!_validPictures.Contains(f.Name.Split(".").Last()) || f.Size == 0) return null;
         var mime = MimeUtility.GetMimeMapping(f.Name);
-        var stream = await _fileContent.GetFileContent(id);
+        var stream = await fileContent.GetFileContent(id);
         return new FileStreamResult(stream, mime);
     }
 }

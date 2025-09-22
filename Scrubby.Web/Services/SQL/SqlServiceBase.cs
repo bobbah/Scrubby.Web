@@ -12,8 +12,5 @@ public abstract class SqlServiceBase
         _connectionString = configuration.GetConnectionString("mn3");
     }
 
-    protected NpgsqlConnection GetConnection()
-    {
-        return new NpgsqlConnection(_connectionString);
-    }
+    protected NpgsqlConnection GetConnection() => new(_connectionString);
 }

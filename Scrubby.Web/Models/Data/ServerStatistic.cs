@@ -18,10 +18,8 @@ public class ServerStatistic
     public string PlayedTimeString => TimeToString(PlayedTime);
     public string ConnectedTimeString => TimeToString(ConnectedTime);
 
-    public static string TimeToString(TimeSpan time)
-    {
-        return $"{(time.Days > 0 ? $"{time.Days} days, " : "")}" +
-               $"{(time.Hours > 0 ? $"{time.Hours} hours, " : "")}" +
-               $"{time.Minutes} minutes";
-    }
+    public static string TimeToString(TimeSpan time) =>
+        $"{(time.Days > 0 ? $"{time.Days} days, " : "")}" +
+        $"{(time.Hours > 0 ? $"{time.Hours} hours, " : "")}" +
+        $"{time.Minutes} minutes";
 }

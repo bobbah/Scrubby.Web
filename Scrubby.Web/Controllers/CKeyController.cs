@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Scrubby.Web.Models;
@@ -9,20 +8,12 @@ using Scrubby.Web.Services.Interfaces;
 
 namespace Scrubby.Web.Controllers;
 
-public class CKeyController : Controller
+public class CKeyController(
+    IPlayerService players,
+    IConnectionService connService,
+    ICKeyService ckeyService)
+    : Controller
 {
-    private readonly ICKeyService _ckey;
-    private readonly IConnectionService _connService;
-    private readonly IPlayerService _players;
-
-    public CKeyController(IPlayerService players, IConnectionService connService,
-        ICKeyService ckey)
-    {
-        _players = players;
-        _connService = connService;
-        _ckey = ckey;
-    }
-
     [HttpGet("ckey/{ckey}")]
     public async Task<IActionResult> FetchCKey(string ckey)
     {
@@ -33,13 +24,13 @@ public class CKeyController : Controller
 
         var dataFetch = new Task[]
         {
-            Task.Run(async () => toGive.Names = await _ckey.GetNamesForCKeyAsync(toGive.Key)),
-            Task.Run(async () => toGive.Playtime = await _ckey.GetServerCountForCKeyAsync(toGive.Key)),
-            Task.Run(async () => toGive.ByondKey = await _ckey.GetByondKeyAsync(toGive.Key))
+            Task.Run(async () => toGive.Names = await ckeyService.GetNamesForCKeyAsync(toGive.Key)),
+            Task.Run(async () => toGive.Playtime = await ckeyService.GetServerCountForCKeyAsync(toGive.Key)),
+            Task.Run(async () => toGive.ByondKey = await ckeyService.GetByondKeyAsync(toGive.Key))
         };
         await Task.WhenAll(dataFetch);
 
-        if (!toGive.Playtime.Any())
+        if (toGive.Playtime.Count == 0)
             return NotFound();
 
         return View("View", toGive);
@@ -49,7 +40,7 @@ public class CKeyController : Controller
     public async Task<IActionResult> GetReceiptsForCKey(string ckey)
     {
         var toSearch = new CKey(ckey);
-        var result = await _players.GetRoundReceiptsForPlayer(toSearch);
+        var result = await players.GetRoundReceiptsForPlayer(toSearch);
         return Ok(result);
     }
 
@@ -60,7 +51,7 @@ public class CKeyController : Controller
 
         var toSearch = new CKey(ckey);
         var result =
-            await _connService.GetConnectionStatsForCKey(toSearch, DateTime.UtcNow.AddDays(-1 * Math.Abs(length)));
+            await connService.GetConnectionStatsForCKey(toSearch, DateTime.UtcNow.AddDays(-1 * Math.Abs(length)));
         return Ok(result);
     }
 
@@ -70,7 +61,7 @@ public class CKeyController : Controller
         if (string.IsNullOrEmpty(model.CKey)) return NotFound("Failed to find ckey, or invalid ckey");
 
         var toSearch = new CKey(model.CKey);
-        var result = await _players.GetRoundReceiptsForPlayer(toSearch, model.StartingRound, model.Limit);
+        var result = await players.GetRoundReceiptsForPlayer(toSearch, model.StartingRound, model.Limit);
         return Ok(result);
     }
 }

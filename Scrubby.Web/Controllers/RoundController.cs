@@ -10,22 +10,13 @@ using Scrubby.Web.Services.Interfaces;
 namespace Scrubby.Web.Controllers;
 
 [Route("round/{id:int}")]
-public class RoundController : Controller
+public class RoundController(IRoundService rounds, IConnectionService connections) : Controller
 {
-    private readonly IConnectionService _connections;
-    private readonly IRoundService _rounds;
-
-    public RoundController(IRoundService rounds, IConnectionService connections)
-    {
-        _rounds = rounds;
-        _connections = connections;
-    }
-
     // Redirects for original files / ned's site
     [HttpGet("source")]
     public async Task<IActionResult> SourceRedirect(int id)
     {
-        var result = await _rounds.GetRound(id);
+        var result = await rounds.GetRound(id);
 
         if (result == null)
             return NotFound();
@@ -35,7 +26,7 @@ public class RoundController : Controller
     [HttpGet]
     public async Task<IActionResult> FetchRound(int id, [FromQuery(Name = "h")] string[] highlight, bool raw)
     {
-        var result = await _rounds.GetRound(id);
+        var result = await rounds.GetRound(id);
 
         if (result == null)
         {
@@ -46,8 +37,8 @@ public class RoundController : Controller
                 {
                     Id = id
                 },
-                NextID = await _rounds.GetNext(id, true, l),
-                LastID = await _rounds.GetNext(id, false, l),
+                NextID = await rounds.GetNext(id, true, l),
+                LastID = await rounds.GetNext(id, false, l),
                 HightlightedCkeys = l
             };
 
@@ -61,8 +52,8 @@ public class RoundController : Controller
             toGive = new RoundModel
             {
                 CurrentRound = result,
-                NextID = await _rounds.GetNext(id, true, l),
-                LastID = await _rounds.GetNext(id, false, l),
+                NextID = await rounds.GetNext(id, true, l),
+                LastID = await rounds.GetNext(id, false, l),
                 HightlightedCkeys = l
             };
         }
@@ -71,16 +62,16 @@ public class RoundController : Controller
             toGive = new RoundModel
             {
                 CurrentRound = result,
-                NextID = await _rounds.GetNext(id),
-                LastID = await _rounds.GetNext(id, false)
+                NextID = await rounds.GetNext(id),
+                LastID = await rounds.GetNext(id, false)
             };
         }
 
-        var connections = (await _connections.GetConnectionsForRound(id)).ToList();
+        var connections1 = (await connections.GetConnectionsForRound(id)).ToList();
 
         var nonPlayers = new List<CKey>();
-        if (connections.Count != 0 && toGive.CurrentRound.Players != null)
-            nonPlayers = connections.Select(x => x.CKey)
+        if (connections1.Count != 0 && toGive.CurrentRound.Players != null)
+            nonPlayers = connections1.Select(x => x.CKey)
                 .Except(toGive.CurrentRound.Players.Select(x => new CKey(x.Ckey))).ToList();
 
         toGive.NonPlaying = nonPlayers.OrderBy(x => x.Cleaned).ToList();
