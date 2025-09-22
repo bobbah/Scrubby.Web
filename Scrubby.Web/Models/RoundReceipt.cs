@@ -12,7 +12,6 @@ public class RoundReceipt
     public bool RoundStartPlayer { get; set; }
     public bool PlayedInRound { get; set; }
     public bool Antagonist { get; set; }
-    public bool RoundStartSuicide { get; set; }
 
     public bool IsSecurity =>
         Job?.ToUpperInvariant() is "SECURITY OFFICER" or "DETECTIVE" or "HEAD OF SECURITY" or "WARDEN";

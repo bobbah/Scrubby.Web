@@ -158,7 +158,6 @@ public class SqlRoundService : SqlServiceBase, IRoundService
                     rf.uploaded,
                     rf.processed,
                     rf.failed,
-                    (EXISTS (SELECT 1 FROM log_message m WHERE m.parent_file = rf.id LIMIT 1)) AS decomposed,
                     rf.stockpile_id AS StockpileId
                 FROM
                     round r

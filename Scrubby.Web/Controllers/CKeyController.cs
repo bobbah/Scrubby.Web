@@ -14,13 +14,11 @@ public class CKeyController : Controller
     private readonly ICKeyService _ckey;
     private readonly IConnectionService _connService;
     private readonly IPlayerService _players;
-    private readonly ISuicideService _suicides;
 
-    public CKeyController(IPlayerService players, ISuicideService suicides, IConnectionService connService,
+    public CKeyController(IPlayerService players, IConnectionService connService,
         ICKeyService ckey)
     {
         _players = players;
-        _suicides = suicides;
         _connService = connService;
         _ckey = ckey;
     }
@@ -46,15 +44,7 @@ public class CKeyController : Controller
 
         return View("View", toGive);
     }
-
-    [HttpGet("suicides/{ckey}")]
-    public async Task<IActionResult> GetSuicidesForCKey(string ckey)
-    {
-        var toSearch = new CKey(ckey);
-        var result = await _suicides.GetSuicidesForCKey(toSearch);
-        return Ok(result);
-    }
-
+    
     [HttpGet("receipts/{ckey}")]
     public async Task<IActionResult> GetReceiptsForCKey(string ckey)
     {

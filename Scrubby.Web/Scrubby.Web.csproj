@@ -39,4 +39,9 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\File\View.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Runtime\GetRound.cshtml" />
+    </ItemGroup>
 </Project>

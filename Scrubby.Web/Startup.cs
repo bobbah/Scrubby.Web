@@ -113,10 +113,8 @@ public class Startup
             });
 
         services.AddTransient<IPlayerService, SqlPlayerService>();
-        services.AddSingleton<ISuicideService, SqlSuicideService>();
         services.AddSingleton<IRoundService, SqlRoundService>();
         services.AddTransient<IConnectionService, SqlConnectionService>();
-        services.AddSingleton<IRuntimeService, SqlRuntimeService>();
         services.AddSingleton<IAnnouncementService, SqlAnnouncementService>();
         services.AddTransient<ICKeyService, SqlCKeyService>();
         services.AddTransient<IUserService, SqlUserService>();

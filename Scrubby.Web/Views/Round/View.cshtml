@@ -326,7 +326,7 @@
         if (file.Name.Contains("photos"))
         {
         }
-        else if (file.Processed || file.Decomposed)
+        else if (file.Processed)
         {
             switch (file.Name)
             {
@@ -334,10 +334,10 @@
                     <a asp-controller="Newscaster" asp-action="GetRound" asp-route-roundid="@Model.CurrentRound.Id" class="btn btn-outline-primary mb-1 disabled" data-bs-placement="top">@file.Name</a>
                     break;
                 case "runtime.txt":
-                    <a asp-controller="Runtime" asp-action="GetRound" asp-route-round="@Model.CurrentRound.Id" class="btn btn-outline-primary mb-1">@file.Name</a>
+                    <a asp-controller="Runtime" asp-action="GetRound" asp-route-round="@Model.CurrentRound.Id" class="btn btn-outline-primary mb-1 disabled">@file.Name</a>
                     break;
                 default:
-                    <a asp-controller="File" asp-action="FetchFile" asp-route-roundid="@Model.CurrentRound.Id" asp-route-file="@file.Name" class="btn btn-outline-primary mb-1 @(file.Decomposed ? "" : "disabled")" data-bs-placement="top">@file.Name</a>
+                    <a asp-controller="File" asp-action="FetchFile" asp-route-roundid="@Model.CurrentRound.Id" asp-route-file="@file.Name" class="btn btn-outline-primary mb-1 disabled" data-bs-placement="top">@file.Name</a>
                     break;
             }
         }

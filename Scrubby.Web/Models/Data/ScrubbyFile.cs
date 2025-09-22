@@ -11,6 +11,5 @@ public class ScrubbyFile
     public DateTimeOffset Uploaded { get; set; }
     public bool Processed { get; set; }
     public bool Failed { get; set; }
-    public bool Decomposed { get; set; }
     public Guid StockpileId { get; set; }
 }

@@ -71,17 +71,6 @@ public class SqlPlayerService : SqlRoundService, IPlayerService
                     CASE WHEN rp.ckey IS NOT NULL AND rp.jointime BETWEEN r.game_start_time AND (r.game_start_time + make_interval(0, 0, 0, 0, 0, 0, r.game_start_duration)) THEN TRUE ELSE FALSE END AS roundstartplayer,
                     rp.job IS NOT NULL AS playedinround,
                     rp.role IS NOT NULL AS antagonist,
-                    EXISTS (
-                        SELECT 1
-                        FROM
-                            suicide s
-                            INNER JOIN log_message m ON s.evidence = m.id
-                        WHERE
-                            s.round = r.id
-                            AND s.ckey = r_init.ckey
-                            AND m.timestamp < r.starttime + INTERVAL '10 minutes'
-                        LIMIT 1
-                    ) AS roundstartsuicide,
                     rp.name,
                     s.display AS server
                 FROM
@@ -118,17 +107,6 @@ public class SqlPlayerService : SqlRoundService, IPlayerService
                     CASE WHEN rp.ckey IS NOT NULL AND rp.jointime BETWEEN r.game_start_time AND (r.game_start_time + make_interval(0, 0, 0, 0, 0, 0, r.game_start_duration)) THEN TRUE ELSE FALSE END AS roundstartplayer,
                     rp.job IS NOT NULL AS playedinround,
                     rp.role IS NOT NULL AS antagonist,
-                    EXISTS (
-                        SELECT 1
-                        FROM
-                            suicide s
-                            INNER JOIN log_message m ON s.evidence = m.id
-                        WHERE
-                            s.round = r.id
-                            AND s.ckey = r_init.ckey
-                            AND m.timestamp < r.starttime + INTERVAL '10 minutes'
-                        LIMIT 1
-                    ) AS roundstartsuicide,
                     rp.name,
                     s.display AS server
                 FROM
